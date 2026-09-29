@@ -23,6 +23,7 @@ class WorkflowContext:
     topic: str
     level: str
     study_time: str
+    quiz_count: int = 10
     learning_goal: str = ""
     source_notes: str = ""
 
@@ -247,7 +248,7 @@ Create:
 10 question/answer flashcards.
 
 ## Multiple-Choice Quiz
-10 MCQs with A-D choices.
+Create exactly {ctx.quiz_count} MCQs with A-D choices.
 
 ## Quiz Answer Key
 Correct option plus a one-line explanation.
@@ -363,7 +364,9 @@ Produce one final Markdown study pack.
 ## 7. Memory Aids
 ## 8. Flashcards
 ## 9. Multiple-Choice Quiz
+Include exactly {ctx.quiz_count} MCQs with A-D choices.
 ## 10. Quiz Answer Key
+Include one answer entry for every MCQ.
 ## 11. Short Questions
 ## 12. Long / Conceptual Questions
 ## 13. Personalized Study Plan
@@ -386,6 +389,7 @@ def execute_workflow(
     topic: str,
     level: str,
     study_time: str,
+    quiz_count: int,
     learning_goal: str,
     source_notes: str,
     progress_callback=None,
@@ -400,6 +404,7 @@ def execute_workflow(
         topic=topic.strip(),
         level=level,
         study_time=study_time,
+        quiz_count=int(quiz_count),
         learning_goal=(learning_goal or "").strip(),
         source_notes=(source_notes or "").strip(),
     )
