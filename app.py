@@ -161,6 +161,20 @@ div.stButton > button {
     border-radius: 12px !important;
     font-weight: 600 !important;
 }
+.hero-badge{display:inline-flex;padding:.38rem .7rem;border-radius:999px;border:1px solid rgba(139,92,246,.26);background:rgba(139,92,246,.10);font-size:.78rem;font-weight:700;margin-bottom:.75rem}
+.feature-row{display:flex;flex-wrap:wrap;gap:.55rem;margin-top:1rem}
+.feature-pill{padding:.36rem .65rem;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.025);font-size:.78rem}
+.sidebar-brand{padding:.95rem 1rem;border:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,.026);margin-bottom:1rem}
+.sidebar-brand-title{font-weight:800}.sidebar-brand-copy{opacity:.62;font-size:.77rem;margin-top:.2rem}
+.model-chip{margin-top:.9rem;padding:.7rem .8rem;border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,.02)}
+.model-label{opacity:.55;text-transform:uppercase;letter-spacing:.08em;font-size:.65rem;margin-bottom:.22rem}
+.model-value{font-family:monospace;font-size:.78rem;opacity:.86;overflow-wrap:anywhere}
+.panel{border:1px solid var(--border);border-radius:22px;padding:1.15rem 1.2rem 1rem;background:linear-gradient(180deg,rgba(255,255,255,.032),rgba(255,255,255,.012));box-shadow:0 12px 32px rgba(0,0,0,.08)}
+.panel-title{font-size:1.05rem;font-weight:750}.panel-subtitle{opacity:.62;font-size:.84rem;margin-top:.2rem;margin-bottom:.9rem}
+.workflow-grid{display:grid;gap:.7rem;margin-top:.8rem}
+.workflow-step{display:grid;grid-template-columns:38px 1fr;align-items:center;gap:.75rem;padding:.75rem .8rem;border-radius:15px;border:1px solid var(--border);background:rgba(255,255,255,.02)}
+.step-icon{width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:rgba(139,92,246,.11);border:1px solid rgba(139,92,246,.18)}
+.step-name{font-size:.9rem;font-weight:700}.step-copy{font-size:.77rem;opacity:.62;margin-top:.08rem}
 </style>
 """,
     unsafe_allow_html=True,
@@ -169,9 +183,17 @@ div.stButton > button {
 st.markdown(
     """
 <div class="hero">
-  <h1>🎓 AI Study Pack Generator</h1>
-  <p>Create a personalized study pack with a multi-stage AI workflow:
-  <strong>Plan → Generate → Assess → Review → Refine</strong></p>
+  <div class="hero-badge">✦ AI-powered study workspace</div>
+  <h1>Turn any topic into a complete study pack.</h1>
+  <p>Create focused notes, flashcards, quizzes and a personalized study plan through
+  a five-stage SenseNova workflow that plans, generates, checks and improves the result.</p>
+  <div class="feature-row">
+    <span class="feature-pill">🧭 Smart planning</span>
+    <span class="feature-pill">📚 Personalized notes</span>
+    <span class="feature-pill">📝 Custom quizzes</span>
+    <span class="feature-pill">🔎 AI review</span>
+    <span class="feature-pill">✨ Final refinement</span>
+  </div>
 </div>
 """,
     unsafe_allow_html=True,
@@ -207,7 +229,15 @@ stored_api_key = get_api_key()
 # Sidebar
 # =========================================================
 with st.sidebar:
-    st.markdown("## ⚙️ Settings")
+    st.markdown(
+        """
+<div class="sidebar-brand">
+  <div class="sidebar-brand-title">🎓 Study Pack Settings</div>
+  <div class="sidebar-brand-copy">Personalize difficulty, time and assessment size.</div>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
 
     if stored_api_key:
         api_key = stored_api_key
@@ -235,24 +265,23 @@ with st.sidebar:
             "1 week",
         ],
         index=2,
+        help="The final study plan will fit this time.",
     )
+
+    quiz_count = st.select_slider(
+        "Number of Quiz Questions",
+        options=[5, 10, 15, 20],
+        value=10,
+        help="Choose how many multiple-choice questions you want.",
+    )
+
+    st.caption(f"Assessment will include **{quiz_count} MCQs**.")
 
     st.markdown(
         f"""
-<div class="mini-card">
-  <div class="mini-label">AI Model</div>
-  <div class="code-pill">{MODEL_NAME}</div>
-</div>
-
-<div class="mini-card">
-  <div class="mini-label">Workflow</div>
-  <div class="workflow-list">
-    <div class="workflow-item">🧭 Planning</div>
-    <div class="workflow-item">📚 Content</div>
-    <div class="workflow-item">📝 Assessment</div>
-    <div class="workflow-item">🔎 Review</div>
-    <div class="workflow-item">✨ Refinement</div>
-  </div>
+<div class="model-chip">
+  <div class="model-label">AI model</div>
+  <div class="model-value">{MODEL_NAME}</div>
 </div>
 """,
         unsafe_allow_html=True,
@@ -265,8 +294,15 @@ with st.sidebar:
 left, right = st.columns([1.15, 0.85], gap="large")
 
 with left:
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-    st.markdown("### 📘 Study Input")
+    st.markdown(
+        """
+<div class="panel">
+  <div class="panel-title">📘 Build your study pack</div>
+  <div class="panel-subtitle">Give the AI a topic and optional course material.</div>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
     topic = st.text_input(
         "Topic / Subject",
         placeholder="Example: Operating Systems - Memory Management",
@@ -288,30 +324,19 @@ with left:
         type=["pdf", "txt", "md"],
         help="Supported files: PDF, TXT, MD",
     )
-    st.markdown('</div>', unsafe_allow_html=True)
 
 with right:
     st.markdown(
         """
-<div class="section-card">
-  <h3>🧠 How the workflow works</h3>
-  <p><strong>1. Planning Agent</strong><br>
-  Breaks the topic into objectives, concepts, and learning order.</p>
-
-  <p><strong>2. Content Agent</strong><br>
-  Creates personalized teaching notes based on the plan.</p>
-
-  <p><strong>3. Assessment Agent</strong><br>
-  Builds flashcards, MCQs, and practice questions from the generated content.</p>
-
-  <p><strong>4. Review Agent</strong><br>
-  Checks quality, accuracy, coverage, and assessment alignment.</p>
-
-  <p><strong>5. Refinement Agent</strong><br>
-  Produces the final polished study pack using all previous outputs.</p>
-
-  <div class="tip-box">
-    <strong>Tip:</strong> Paste lecture notes or upload a PDF to get more personalized results.
+<div class="panel">
+  <div class="panel-title">🧠 Multi-stage AI workflow</div>
+  <div class="panel-subtitle">Each stage passes its output forward, so the final pack is reviewed before delivery.</div>
+  <div class="workflow-grid">
+    <div class="workflow-step"><div class="step-icon">🧭</div><div><div class="step-name">Planning</div><div class="step-copy">Defines objectives, priorities and learning order.</div></div></div>
+    <div class="workflow-step"><div class="step-icon">📚</div><div><div class="step-name">Content</div><div class="step-copy">Creates focused notes, examples and key concepts.</div></div></div>
+    <div class="workflow-step"><div class="step-icon">📝</div><div><div class="step-name">Assessment</div><div class="step-copy">Builds flashcards and your selected number of MCQs.</div></div></div>
+    <div class="workflow-step"><div class="step-icon">🔎</div><div><div class="step-name">Review</div><div class="step-copy">Checks quality, coverage and question alignment.</div></div></div>
+    <div class="workflow-step"><div class="step-icon">✨</div><div><div class="step-name">Refinement</div><div class="step-copy">Applies review feedback and creates the final pack.</div></div></div>
   </div>
 </div>
 """,
@@ -323,7 +348,7 @@ with right:
 # Run workflow
 # =========================================================
 if st.button(
-    "✨ Generate Study Pack",
+    "✨ Generate My Study Pack",
     type="primary",
     use_container_width=True,
 ):
@@ -351,7 +376,7 @@ if st.button(
     progress_map = {
         "planning": (10, "🧭 Planning learning strategy..."),
         "content_generation": (30, "📚 Generating study content..."),
-        "assessment": (50, "📝 Creating assessments..."),
+        "assessment": (52, f"📝 Creating {quiz_count} quiz questions..."),
         "review": (70, "🔎 Reviewing quality..."),
         "refinement": (90, "✨ Refining final study pack..."),
         "done": (100, "✅ Workflow completed."),
@@ -368,6 +393,7 @@ if st.button(
             topic=topic,
             level=level,
             study_time=study_time,
+            quiz_count=quiz_count,
             learning_goal=learning_goal,
             source_notes=source_notes,
             progress_callback=update_progress,
@@ -461,6 +487,7 @@ if context:
                 "topic": context.topic,
                 "level": context.level,
                 "study_time": context.study_time,
+                "quiz_count": context.quiz_count,
                 "learning_goal": context.learning_goal,
                 "stages": context.stage_summary(),
                 "errors": context.errors,
