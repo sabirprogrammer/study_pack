@@ -18,28 +18,148 @@ st.set_page_config(
 st.markdown(
     """
 <style>
+:root {
+    --border: rgba(128,128,128,.18);
+    --soft-bg: rgba(255,255,255,.03);
+}
+
 .block-container {
-    max-width: 1200px;
-    padding-top: 2rem;
+    max-width: 1180px;
+    padding-top: 1.8rem;
+    padding-bottom: 2rem;
 }
+
+[data-testid="stSidebar"] {
+    border-right: 1px solid var(--border);
+}
+
 .hero {
-    padding: 1.5rem 1.7rem;
-    border: 1px solid rgba(128,128,128,.25);
-    border-radius: 18px;
-    margin-bottom: 1.5rem;
+    padding: 1.6rem 1.8rem;
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    margin-bottom: 1.2rem;
+    background:
+        radial-gradient(circle at top right, rgba(72, 149, 239, 0.16), transparent 28%),
+        radial-gradient(circle at left bottom, rgba(67, 170, 139, 0.13), transparent 25%),
+        rgba(255,255,255,.015);
 }
+
 .hero h1 {
     margin: 0;
+    font-size: 2.2rem;
+    line-height: 1.15;
 }
+
 .hero p {
-    opacity: .75;
-    margin: .4rem 0 0 0;
+    opacity: .78;
+    margin: .45rem 0 0 0;
+    font-size: 1rem;
 }
-.stage {
-    padding: .7rem;
+
+.section-card {
+    border: 1px solid var(--border);
+    background: var(--soft-bg);
+    border-radius: 18px;
+    padding: 1rem 1rem .9rem 1rem;
+    height: 100%;
+}
+
+.section-card h3 {
+    margin-top: 0;
+    margin-bottom: .4rem;
+}
+
+.section-card p, .section-card li {
+    opacity: .88;
+    font-size: .95rem;
+}
+
+.mini-card {
+    border: 1px solid var(--border);
+    background: var(--soft-bg);
+    border-radius: 16px;
+    padding: .85rem .95rem;
+    margin-bottom: .8rem;
+}
+
+.mini-label {
+    font-size: .78rem;
+    opacity: .72;
+    margin-bottom: .25rem;
+}
+
+.code-pill {
+    display: inline-block;
+    padding: .45rem .65rem;
     border-radius: 12px;
-    border: 1px solid rgba(128,128,128,.25);
+    background: rgba(255,255,255,.04);
+    border: 1px solid var(--border);
+    font-family: monospace;
+    font-size: .92rem;
+}
+
+.workflow-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .42rem;
+    margin-top: .55rem;
+}
+
+.workflow-item {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: .58rem .7rem;
+    background: rgba(255,255,255,.025);
+    font-size: .93rem;
+}
+
+.info-chip {
+    display: inline-block;
+    padding: .28rem .62rem;
+    border-radius: 999px;
+    background: rgba(67, 170, 139, 0.12);
+    border: 1px solid rgba(67, 170, 139, 0.25);
+    font-size: .8rem;
+    margin-top: .2rem;
+}
+
+.stage {
+    padding: .8rem .55rem;
+    border-radius: 16px;
+    border: 1px solid var(--border);
     text-align: center;
+    background: var(--soft-bg);
+}
+
+.stage h3 {
+    margin: 0 0 .25rem 0;
+}
+
+.stage strong {
+    font-size: .95rem;
+}
+
+.status-text {
+    opacity: .72;
+    font-size: .8rem;
+}
+
+.tip-box {
+    border: 1px dashed var(--border);
+    border-radius: 16px;
+    padding: .9rem 1rem;
+    margin-top: .8rem;
+    background: rgba(255,255,255,.02);
+}
+
+.tight-gap {
+    margin-top: .35rem;
+}
+
+div[data-testid="stDownloadButton"] > button,
+div.stButton > button {
+    border-radius: 12px !important;
+    font-weight: 600 !important;
 }
 </style>
 """,
@@ -49,8 +169,9 @@ st.markdown(
 st.markdown(
     """
 <div class="hero">
-<h1>🎓 AI Study Pack Generator</h1>
-<p>Plan → Generate → Assess → Review → Refine with SenseNova AI</p>
+  <h1>🎓 AI Study Pack Generator</h1>
+  <p>Create a personalized study pack with a multi-stage AI workflow:
+  <strong>Plan → Generate → Assess → Review → Refine</strong></p>
 </div>
 """,
     unsafe_allow_html=True,
@@ -86,16 +207,15 @@ stored_api_key = get_api_key()
 # Sidebar
 # =========================================================
 with st.sidebar:
-    st.header("⚙️ Settings")
+    st.markdown("## ⚙️ Settings")
 
     if stored_api_key:
         api_key = stored_api_key
-        st.success("SenseNova API key loaded securely.")
     else:
         api_key = st.text_input(
             "SenseNova API Key",
             type="password",
-            help="For deployment, use Streamlit Secrets instead.",
+            help="For deployment, add the key in Streamlit Secrets.",
         )
 
     level = st.selectbox(
@@ -117,29 +237,36 @@ with st.sidebar:
         index=2,
     )
 
-    st.divider()
-
-    st.caption("AI Model")
-    st.code(MODEL_NAME, language=None)
-
-    st.caption("Workflow")
     st.markdown(
-        """
-1. 🧭 Planning
-2. 📚 Content
-3. 📝 Assessment
-4. 🔎 Review
-5. ✨ Refinement
-"""
+        f"""
+<div class="mini-card">
+  <div class="mini-label">AI Model</div>
+  <div class="code-pill">{MODEL_NAME}</div>
+</div>
+
+<div class="mini-card">
+  <div class="mini-label">Workflow</div>
+  <div class="workflow-list">
+    <div class="workflow-item">🧭 Planning</div>
+    <div class="workflow-item">📚 Content</div>
+    <div class="workflow-item">📝 Assessment</div>
+    <div class="workflow-item">🔎 Review</div>
+    <div class="workflow-item">✨ Refinement</div>
+  </div>
+</div>
+""",
+        unsafe_allow_html=True,
     )
 
 
 # =========================================================
 # Inputs
 # =========================================================
-left, right = st.columns([1.1, 0.9], gap="large")
+left, right = st.columns([1.15, 0.85], gap="large")
 
 with left:
+    st.markdown('<div class="section-card">', unsafe_allow_html=True)
+    st.markdown("### 📘 Study Input")
     topic = st.text_input(
         "Topic / Subject",
         placeholder="Example: Operating Systems - Memory Management",
@@ -152,35 +279,43 @@ with left:
 
     notes = st.text_area(
         "Paste Notes / Syllabus",
-        placeholder="Paste lecture notes or important syllabus points...",
-        height=190,
+        placeholder="Paste lecture notes, outline, or important syllabus points...",
+        height=180,
     )
 
     uploaded_file = st.file_uploader(
         "Upload Notes",
         type=["pdf", "txt", "md"],
+        help="Supported files: PDF, TXT, MD",
     )
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with right:
-    st.subheader("🧠 How the workflow works")
-
     st.markdown(
         """
-**1. Planning Agent**  
-Breaks the topic into objectives, priorities, and a learning order.
+<div class="section-card">
+  <h3>🧠 How the workflow works</h3>
+  <p><strong>1. Planning Agent</strong><br>
+  Breaks the topic into objectives, concepts, and learning order.</p>
 
-**2. Content Agent**  
-Uses the plan to create personalized teaching notes.
+  <p><strong>2. Content Agent</strong><br>
+  Creates personalized teaching notes based on the plan.</p>
 
-**3. Assessment Agent**  
-Creates flashcards, MCQs, and questions from the generated content.
+  <p><strong>3. Assessment Agent</strong><br>
+  Builds flashcards, MCQs, and practice questions from the generated content.</p>
 
-**4. Review Agent**  
-Checks quality, accuracy, coverage, and assessment alignment.
+  <p><strong>4. Review Agent</strong><br>
+  Checks quality, accuracy, coverage, and assessment alignment.</p>
 
-**5. Refinement Agent**  
-Uses all previous outputs and review feedback to produce the final study pack.
-"""
+  <p><strong>5. Refinement Agent</strong><br>
+  Produces the final polished study pack using all previous outputs.</p>
+
+  <div class="tip-box">
+    <strong>Tip:</strong> Paste lecture notes or upload a PDF to get more personalized results.
+  </div>
+</div>
+""",
+        unsafe_allow_html=True,
     )
 
 
@@ -254,7 +389,6 @@ context = st.session_state.get("study_context")
 
 if context:
     st.divider()
-
     st.subheader("📊 Workflow Status")
 
     columns = st.columns(5)
@@ -282,9 +416,9 @@ if context:
             st.markdown(
                 f"""
 <div class="stage">
-<h3>{status_icon.get(record.status, "⚪")}</h3>
-<strong>{label}</strong><br>
-<small>{record.status.title()}</small>
+  <h3>{status_icon.get(record.status, "⚪")}</h3>
+  <strong>{label}</strong><br>
+  <span class="status-text">{record.status.title()}</span>
 </div>
 """,
                 unsafe_allow_html=True,
